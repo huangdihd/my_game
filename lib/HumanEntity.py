@@ -23,7 +23,8 @@ class HumanEntity(Entity):
     _animation: EntityAnimation
     _direction = BACK
 
-    def __init__(self, pos: Vector2 = pygame.Vector2(0, 0), speed: float = 0, screen: Surface = None, animation: EntityAnimation = None):
+    def __init__(self, pos: Vector2 = pygame.Vector2(0, 0), speed: float = 0, screen: Surface = None,
+                 animation: EntityAnimation = None):
         with BytesIO() as byte_buffer:
             animation.get_walking_forward().save(byte_buffer, format="PNG")
             byte_buffer.seek(0)

@@ -8,7 +8,8 @@ class Entity:
     _image: Surface
     _speed = 0
 
-    def __init__(self, pos: Vector2 = pygame.Vector2(0, 0), speed: float = 0, image: Surface = None, screen: Surface = None) -> None:
+    def __init__(self, pos: Vector2 = pygame.Vector2(0, 0), speed: float = 0, image: Surface = None,
+                 screen: Surface = None) -> None:
         if image is not None and screen is not None:
             self._screen = screen
             self._image = image
