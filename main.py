@@ -1,7 +1,6 @@
 from pygame.event import Event
 
 from pygame import Surface
-from pygame.time import Clock
 
 from lib.HumanEntity import HumanEntity
 from lib.Player import Player
@@ -12,7 +11,7 @@ from lib.EntityAnimation import EntityAnimation
 
 screen: Surface
 running = False
-clock: Clock = pygame.time.Clock()
+clock = pygame.time.Clock()
 entities = []
 fps: int = 180
 
