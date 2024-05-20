@@ -15,8 +15,14 @@ class Entity:
             self._image = image
         self._pos = pos
         self._speed = speed
+        self._entities = None
+
+    def set_all_entities(self, entities: list):
+        self._entities = entities
 
     def move(self, x: int = 0, y: int = 0) -> None:
+        if self.will_collide(x, y):
+            return
         self._pos.x += x * self._speed
         self._pos.y += y * self._speed
 
@@ -33,8 +39,8 @@ class Entity:
             screen = self._screen
         if image is not None and screen is not None:
             draw_pos = self.get_pos().copy()
-            draw_pos.x -= self._image.get_width() / 2
-            draw_pos.y -= self._image.get_height() / 2
+            draw_pos.x -= self._image.get_width() // 2
+            draw_pos.y -= self._image.get_height() // 2
             self._screen.blit(self._image, draw_pos)
 
     def set_image(self, image: Surface):
@@ -42,3 +48,26 @@ class Entity:
 
     def set_screen(self, screen: Surface):
         self._screen = screen
+
+    def get_rect(self):
+        w, h = self._image.get_width(), self._image.get_height()
+
+        rect = pygame.Rect(self._pos.x - w / 2,
+                           self._pos.y - h / 2,
+                           w, h)
+        return rect
+
+    def will_collide(self, x, y, entities=None):
+        if not entities:
+            entities = self._entities
+        if not entities:
+            return False
+        rect = self.get_rect()
+        rect.x += x * self._speed
+        rect.y += y * self._speed
+        for entity in entities:
+            if entity == self:
+                continue
+            if rect.colliderect(entity.get_rect()):
+                return True
+        return False

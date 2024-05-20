@@ -3,6 +3,7 @@ from pygame.event import Event
 from pygame import Surface
 from pygame.time import Clock
 
+from lib.Entity import Entity
 from lib.HumanEntity import HumanEntity
 from lib.Player import Player
 
@@ -13,7 +14,7 @@ from lib.EntityAnimation import EntityAnimation
 screen: Surface
 running = False
 clock: Clock = pygame.time.Clock()
-entities = []
+entities: list[Entity] = []
 fps: int = 180
 
 
@@ -25,9 +26,14 @@ def init(title: str = None):
     pygame.display.set_icon(pygame.image.load('resources/logo.png'))
     player_animation = EntityAnimation("resources/player/", int(fps / 10))
     pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+    pos1 = pos.copy()
+    pos1.x -= 100
     entities.append(Player(pos, 2 / (fps / 60), screen=screen, animation=player_animation))
-    entities.append(HumanEntity(pos.copy(), 2 / (fps / 60), screen=screen,
+    entities.append(HumanEntity(pos1, 2 / (fps / 60), screen=screen,
                                 animation=EntityAnimation('resources/player/', int(fps / 10))))
+
+    entities[0].set_all_entities(entities)
+    entities[1].set_all_entities(entities)
     running = True
 
 
@@ -59,8 +65,10 @@ def event_processor(e: Event):
             entities[0].slash()
         if e.dict['unicode'] == 'r':
             entities[0].cast()
-        if e.dict['unicode'] == ' ':
+        if e.dict['unicode'] == 't':
             entities[1].slash()
+        if e.dict['unicode'] == ' ':
+            entities[1].jump()
 
 
 def screen_update():

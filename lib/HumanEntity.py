@@ -11,6 +11,8 @@ IDLE = 0
 WALK = 1
 SLASH = 2
 CAST = 3
+JUMP_IN_PLACE = 4
+JUMP_FORWARD = 5
 FRONT = 0
 LEFT = 1
 RIGHT = 2
@@ -18,10 +20,7 @@ BACK = 3
 
 
 class HumanEntity(Entity):
-    _action = 0
-    _status = IDLE
     _animation: EntityAnimation
-    _direction = BACK
 
     def __init__(self, pos: Vector2 = pygame.Vector2(0, 0), speed: float = 0, screen: Surface = None,
                  animation: EntityAnimation = None):
@@ -30,6 +29,11 @@ class HumanEntity(Entity):
             byte_buffer.seek(0)
             super().__init__(pos, speed, pygame.image.load(byte_buffer), screen)
         self._animation = animation
+        self._status = IDLE
+
+        self._direction = BACK
+        self._action = 0
+        self._jump_v_speed = 0
 
     def walk_forward(self, distance: int = 1):
         if self._action != 0 and self._status != WALK:
@@ -149,6 +153,42 @@ class HumanEntity(Entity):
             byte_buffer.seek(0)
             self.set_image(pygame.image.load(byte_buffer))
 
+    def jump(self, distance: int = 1):
+        jump_v_speed = 15
+        jump_x_speed = 4
+        if self._status == IDLE:
+            self._status = JUMP_IN_PLACE
+            if self._action != 0:
+                return
+            self._jump_v_speed = jump_v_speed
+            self._action = self._jump_v_speed * 2
+        elif self._status == WALK:
+            self._status = JUMP_FORWARD
+            if self._action != 0:
+                return
+            self._jump_v_speed = jump_v_speed
+            self._action = self._jump_v_speed * 2
+
+        if self._status == JUMP_IN_PLACE:
+            x = 0
+        elif self._status == JUMP_FORWARD:
+            if self._direction == LEFT:
+                x = -distance * jump_x_speed
+            elif self._direction == RIGHT:
+                x = distance * jump_x_speed
+            elif self._direction == FRONT:
+                x = 0
+            elif self._direction == BACK:
+                x = 0
+        else:
+            return
+
+        self.move(x, -self._jump_v_speed)
+        self._jump_v_speed -= 1
+        if self._jump_v_speed < -jump_v_speed:
+            self._status = IDLE
+            self._action = 1
+
     def draw(self, image: Surface = None, screen: Surface = None):
         if self._action == 0:
             self._status = IDLE
@@ -158,6 +198,8 @@ class HumanEntity(Entity):
             self.slash()
         elif self._status == CAST:
             self.cast()
+        elif self._status in [JUMP_IN_PLACE, JUMP_FORWARD]:
+            self.jump()
         self._action -= 1
         super().draw(image, screen)
 
