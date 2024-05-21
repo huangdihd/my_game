@@ -1,92 +1,56 @@
+import pygame
 from pygame.event import Event
 
-from pygame import Surface
-from pygame.time import Clock
 
-from lib.Entity import Entity
+from lib.EntityAnimation import EntityAnimation
+from lib.Game import Game
 from lib.HumanEntity import HumanEntity
 from lib.Player import Player
 
-import pygame
 
-from lib.EntityAnimation import EntityAnimation
-
-screen: Surface
-running = False
-clock: Clock = pygame.time.Clock()
-entities: list[Entity] = []
-fps: int = 180
-
-
-def init(title: str = None):
-    global screen, running, clock, fps
-    pygame.init()
-    screen = pygame.display.set_mode((800, 600), flags=pygame.RESIZABLE)
-    pygame.display.set_caption(title)
-    pygame.display.set_icon(pygame.image.load('resources/logo.png'))
-    player_animation = EntityAnimation("resources/player/", int(fps / 10))
-    pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
-    pos1 = pos.copy()
-    pos1.x -= 100
-    entities.append(Player(pos, 2 / (fps / 60), screen=screen, animation=player_animation))
-    entities.append(HumanEntity(pos1, 2 / (fps / 60), screen=screen,
-                                animation=EntityAnimation('resources/player/', int(fps / 10))))
-
-    entities[0].set_all_entities(entities)
-    entities[1].set_all_entities(entities)
-    running = True
+def event(e: Event):
+    if e.type == pygame.KEYDOWN:
+        if e.dict['unicode'] == 'e':
+            game.player.slash()
+        if e.dict['unicode'] == 'r':
+            game.player.cast()
+        if e.dict['unicode'] == ' ':
+            game.get_entities()[1].slash()
+        if e.dict['unicode'] == 'j':
+            game.get_entities()[1].jump()
 
 
 def update():
-    global entities
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w] and not keys[pygame.K_s]:
-        entities[0].walk_forward()
+        game.player.walk_forward()
     if keys[pygame.K_s] and not keys[pygame.K_w]:
-        entities[0].walk_back()
+        game.player.walk_back()
     if keys[pygame.K_a] and not keys[pygame.K_d]:
-        entities[0].walk_left()
+        game.player.walk_left()
     if keys[pygame.K_d] and not keys[pygame.K_a]:
-        entities[0].walk_right()
+        game.player.walk_right()
     if keys[pygame.K_UP] and not keys[pygame.K_DOWN]:
-        entities[1].walk_forward()
+        game.get_entities()[1].walk_forward()
     if keys[pygame.K_DOWN] and not keys[pygame.K_UP]:
-        entities[1].walk_back()
+        game.get_entities()[1].walk_back()
     if keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
-        entities[1].walk_left()
+        game.get_entities()[1].walk_left()
     if keys[pygame.K_RIGHT] and not keys[pygame.K_LEFT]:
-        entities[1].walk_right()
-
-
-def event_processor(e: Event):
-    global entities
-    if e.type == pygame.KEYDOWN:
-        if e.dict['unicode'] == 'e':
-            entities[0].slash()
-        if e.dict['unicode'] == 'r':
-            entities[0].cast()
-        if e.dict['unicode'] == 't':
-            entities[1].slash()
-        if e.dict['unicode'] == ' ':
-            entities[1].jump()
-
-
-def screen_update():
-    global screen, entities
-    screen.fill("purple")
-    for entity in sorted(entities, key=lambda e: e.get_pos().y):
-        entity.draw()
+        game.get_entities()[1].walk_right()
 
 
 if __name__ == '__main__':
-    init('My_Game')
-    while running:
-        events = pygame.event.get()
-        for event in events:
-            if event.type == pygame.QUIT:
-                running = False
-            event_processor(event)
-        update()
-        screen_update()
-        pygame.display.update()
-        clock.tick(fps)
+    player_animation = EntityAnimation("resources/player/", int(180 / 10))
+    pos = pygame.Vector2(400, 300)
+    player = Player(pos, 2 / (180 / 60), animation=player_animation)
+    game = Game("My_game", player, (800, 600))
+    game.on_update(update)
+    game.on_event(event)
+
+    pos1 = pos.copy()
+    pos1.x -= 100
+    player2 = HumanEntity(pos1, 2 / (game.fps / 60),
+                          animation=EntityAnimation('resources/player/', int(game.fps / 10)))
+    game.add_entity(player2)
+    game.run()
