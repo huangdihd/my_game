@@ -1,12 +1,22 @@
 import pygame
+from pygame import Vector2
 from pygame.event import Event
 
+from lib.CollisionBox import CollisionBox
 from lib.EntityAnimation import EntityAnimation
 from lib.Game import Game
 from lib.HumanEntity import HumanEntity
 from lib.Player import Player
 
 
+player_animation = EntityAnimation("resources/player/", int(180 / 10))
+pos = pygame.Vector2(400, 300)
+player = Player(pos, 2 / (180 / 60), animation=player_animation, collision_box=CollisionBox(
+    Vector2(0, 0), Vector2(-16, -32), Vector2(16, 32)))
+game = Game("My_game", player, (800, 600))
+
+
+@game.on_event()
 def event(e: Event):
     if e.type == pygame.KEYDOWN:
         if e.dict['unicode'] == 'e':
@@ -17,6 +27,7 @@ def event(e: Event):
             game.get_entities()[1].slash()
 
 
+@game.on_update()
 def update():
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w] and not keys[pygame.K_s]:
@@ -38,12 +49,6 @@ def update():
 
 
 if __name__ == '__main__':
-    player_animation = EntityAnimation("resources/player/", int(180 / 10))
-    pos = pygame.Vector2(400, 300)
-    player = Player(pos, 2 / (180 / 60), animation=player_animation)
-    game = Game("My_game", player, (800, 600))
-    game.on_update(update)
-    game.on_event(event)
     player2 = HumanEntity(pos.copy(), 2 / (game.fps / 60),
                           animation=EntityAnimation('resources/player/', int(game.fps / 10)))
     game.add_entity(player2)
