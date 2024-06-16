@@ -1,3 +1,5 @@
+from copy import copy
+
 from pygame import Vector2
 
 
@@ -25,10 +27,25 @@ class CollisionBox:
         return min_x <= point.x <= max_x and min_y <= point.y <= max_y
 
     def intersects(self, other: 'CollisionBox') -> bool:
-        return not (self.point2.x + self.pos.x < other.point1.x or
-                    self.point1.x + self.pos.x > other.point2.x or
-                    self.point2.y + self.pos.y < other.point1.y or
-                    self.point1.y + self.pos.y > other.point2.y)
+        return not (self.get_abs_x2() < other.get_abs_x1() or
+                    self.get_abs_x1() > other.get_abs_x2() or
+                    self.get_abs_y2() < other.get_abs_y1() or
+                    self.get_abs_y1() > other.get_abs_y2())
 
     def set_pos(self, pos: Vector2) -> None:
         self.pos = pos
+
+    def get_abs_x1(self) -> float:
+        return self.point1.x + self.pos.x
+
+    def get_abs_x2(self) -> float:
+        return self.point2.x + self.pos.x
+
+    def get_abs_y1(self) -> float:
+        return self.point1.y + self.pos.y
+
+    def get_abs_y2(self) -> float:
+        return self.point2.y + self.pos.y
+
+    def copy(self):
+        return copy(self)

@@ -25,11 +25,12 @@ class HumanEntity(Entity):
     _direction = BACK
 
     def __init__(self, pos: Vector2 = pygame.Vector2(0, 0), speed: float = 0, screen: Surface = None,
-                 animation: EntityAnimation = None, collision_box: CollisionBox = CollisionBox(Vector2(0, 0))):
+                 animation: EntityAnimation = None, collision_box: CollisionBox = CollisionBox(Vector2(0, 0)),
+                 view_collision_box: bool = False):
         with BytesIO() as byte_buffer:
-            animation.get_walking_forward().save(byte_buffer, format="PNG")
+            animation.get_cast_front().save(byte_buffer, format="PNG")
             byte_buffer.seek(0)
-            super().__init__(pos, speed, pygame.image.load(byte_buffer), screen, collision_box)
+            super().__init__(pos, speed, pygame.image.load(byte_buffer), screen, collision_box, view_collision_box)
         self._animation = animation
 
     def walk_forward(self, distance: int = 1):
